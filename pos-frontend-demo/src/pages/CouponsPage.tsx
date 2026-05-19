@@ -72,12 +72,13 @@ export default function CouponsPage() {
 
   const openEditModal = (coupon: Coupon) => {
     setEditingCoupon(coupon);
+    const expiry = coupon.expiryDate ?? coupon.validUntil ?? coupon.validTo ?? '';
     setFormData({
       code: coupon.code,
-      discountType: coupon.discountType,
-      value: coupon.value,
-      expiryDate: coupon.expiryDate.split('T')[0],
-      minOrderValue: coupon.minOrderValue,
+      discountType: coupon.discountType ?? 'FLAT',
+      value: coupon.value ?? coupon.discountValue ?? '',
+      expiryDate: expiry.split('T')[0],
+      minOrderValue: coupon.minOrderValue ?? '',
       maxDiscount: coupon.maxDiscount ?? '',
       validFrom: coupon.validFrom ? coupon.validFrom.split('T')[0] : '',
       validTo: coupon.validTo ? coupon.validTo.split('T')[0] : '',
@@ -108,12 +109,15 @@ export default function CouponsPage() {
     try {
       setSaving(true);
       const payload: CouponFormData = {
-        ...formData,
         code: formData.code.trim(),
+        discountType: formData.discountType,
         value: valueNum,
+        expiryDate: formData.expiryDate,
         minOrderValue: toNumber(formData.minOrderValue, 0),
         maxDiscount: toOptionalNumber(formData.maxDiscount),
         usageLimit: toOptionalNumber(formData.usageLimit),
+        validFrom: formData.validFrom ? formData.validFrom : undefined,
+        validTo: formData.validTo ? formData.validTo : undefined,
       };
 
       if (editingCoupon) {
@@ -159,7 +163,8 @@ export default function CouponsPage() {
     }
   };
 
-  const isExpired = (date: string) => new Date(date) < new Date();
+  const getExpiry = (c: Coupon) => c.expiryDate ?? c.validUntil ?? c.validTo ?? '';
+  const isExpired = (date?: string) => (date ? new Date(date) < new Date() : false);
 
   const columns = [
     { key: 'code', header: 'Code', render: (c: Coupon) => (
@@ -176,25 +181,28 @@ export default function CouponsPage() {
     { key: 'minOrderValue', header: 'Min Order', render: (c: Coupon) => (
       formatMoney(c.minOrderValue)
     )},
-    { key: 'expiryDate', header: 'Expiry', render: (c: Coupon) => (
-      <span className={isExpired(c.expiryDate) ? 'text-red-600' : ''}>
-        {new Date(c.expiryDate).toLocaleDateString()}
-      </span>
-    )},
+    { key: 'expiryDate', header: 'Expiry', render: (c: Coupon) => {
+      const expiry = getExpiry(c);
+      return (
+        <span className={isExpired(expiry) ? 'text-red-600' : ''}>
+          {expiry ? new Date(expiry).toLocaleDateString() : '-'}
+        </span>
+      );
+    }},
     { key: 'usage', header: 'Usage', render: (c: Coupon) => (
       c.usageLimit ? `${c.timesUsed}/${c.usageLimit}` : `${c.timesUsed}/Infinity`
     )},
     { key: 'status', header: 'Status', render: (c: Coupon) => (
       <button
         onClick={() => handleToggle(c)}
-        disabled={isExpired(c.expiryDate)}
+        disabled={isExpired(getExpiry(c))}
         className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-          c.isActive && !isExpired(c.expiryDate)
+          c.isActive && !isExpired(getExpiry(c))
             ? 'bg-green-100 text-green-700 hover:bg-green-200'
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-        } ${isExpired(c.expiryDate) ? 'opacity-50 cursor-not-allowed' : ''}`}
+        } ${isExpired(getExpiry(c)) ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
-        {!c.isActive ? 'Inactive' : isExpired(c.expiryDate) ? 'Expired' : 'Active'}
+        {!c.isActive ? 'Inactive' : isExpired(getExpiry(c)) ? 'Expired' : 'Active'}
       </button>
     )},
     { key: 'actions', header: 'Actions', render: (c: Coupon) => (

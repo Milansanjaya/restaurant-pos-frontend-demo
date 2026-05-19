@@ -30,7 +30,7 @@ export default function BatchesPage() {
   });
 
   const buildDashboardFromBatches = (list: Batch[]): ExpiryDashboard => {
-    const stats: ExpiryDashboard = {
+    const stats: Required<Pick<ExpiryDashboard, 'totalBatches' | 'normalCount' | 'warningCount' | 'criticalCount' | 'expiredCount'>> = {
       totalBatches: list.length,
       normalCount: 0,
       warningCount: 0,
@@ -179,7 +179,7 @@ export default function BatchesPage() {
       key: 'product',
       header: 'Product',
       render: (item: Batch) =>
-        typeof item.product_id === 'object' ? item.product_id.name : '-',
+        item.product_id && typeof item.product_id === 'object' ? item.product_id.name : '-',
     },
     {
       key: 'remainingQuantity',
@@ -203,22 +203,26 @@ export default function BatchesPage() {
     {
       key: 'daysUntilExpiry',
       header: 'Days Left',
-      render: (item: Batch) => (
-        <span className={item.daysUntilExpiry < 0 ? 'text-red-600 font-bold' : item.daysUntilExpiry < 7 ? 'text-yellow-600 font-medium' : ''}>
-          {item.daysUntilExpiry < 0 ? `${Math.abs(item.daysUntilExpiry)} days ago` : `${item.daysUntilExpiry} days`}
-        </span>
-      ),
+      render: (item: Batch) => {
+        const days = item.daysUntilExpiry;
+        if (typeof days !== 'number') return '-';
+        return (
+          <span className={days < 0 ? 'text-red-600 font-bold' : days < 7 ? 'text-yellow-600 font-medium' : ''}>
+            {days < 0 ? `${Math.abs(days)} days ago` : `${days} days`}
+          </span>
+        );
+      },
     },
     {
       key: 'alertStatus',
       header: 'Alert',
-      render: (item: Batch) => getAlertBadge(item.alertStatus),
+      render: (item: Batch) => getAlertBadge(item.alertStatus ?? 'NORMAL'),
     },
     {
       key: 'status',
       header: 'Status',
       render: (item: Batch) => (
-        <Badge variant={getStatusBadgeVariant(item.status)}>{item.status}</Badge>
+        <Badge variant={getStatusBadgeVariant(item.status ?? 'ACTIVE')}>{item.status ?? 'ACTIVE'}</Badge>
       ),
     },
     {

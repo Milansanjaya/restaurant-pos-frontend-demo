@@ -169,7 +169,7 @@ export default function DiscountsPage() {
       trackStock: p.trackStock ?? false,
       lowStockThreshold: p.lowStockThreshold ?? 0,
       preparationTime: p.preparationTime,
-      unit: unitId,
+      unit: unitId || '',
     };
   };
 
@@ -216,11 +216,11 @@ export default function DiscountsPage() {
     setEditingDiscount(discount);
     setFormData({
       name: discount.name,
-      discountType: discount.discountType,
+      discountType: discount.discountType ?? discount.type ?? 'PERCENTAGE',
       value: discount.value,
       validFrom: discount.validFrom ? discount.validFrom.split('T')[0] : '',
       validTo: discount.validTo ? discount.validTo.split('T')[0] : '',
-      isActive: discount.isActive,
+      isActive: discount.isActive ?? true,
     });
     setProductSearch('');
     loadPickerProducts('');
@@ -262,10 +262,12 @@ export default function DiscountsPage() {
       setSaving(true);
 
       const payload: DiscountFormData = {
-        ...formData,
+        name: formData.name,
+        discountType: formData.discountType,
         value: toNumber(formData.value, 0),
         validFrom: formData.validFrom ? formData.validFrom : undefined,
         validTo: formData.validTo ? formData.validTo : undefined,
+        isActive: formData.isActive,
       };
 
       let saved: Discount;

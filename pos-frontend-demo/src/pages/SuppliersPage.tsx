@@ -95,14 +95,16 @@ export default function SuppliersPage() {
   const openEditModal = (supplier: Supplier) => {
     setEditingSupplier(supplier);
     setFormData({
-      code: supplier.code,
+      code: supplier.code || '',
       name: supplier.name,
-      contactPerson: supplier.contactPerson,
-      phone: supplier.phone,
-      email: supplier.email,
-      address: supplier.address,
-      creditLimit: supplier.creditLimit,
-      paymentTerms: supplier.paymentTerms,
+      contactPerson: supplier.contactPerson || '',
+      phone: supplier.phone || '',
+      email: supplier.email || '',
+      address: supplier.address || '',
+      creditLimit: typeof supplier.creditLimit === 'number' ? supplier.creditLimit : '',
+      paymentTerms: supplier.paymentTerms === undefined || supplier.paymentTerms === null || supplier.paymentTerms === ''
+        ? 30
+        : Number(supplier.paymentTerms),
       gstNumber: supplier.gstNumber || '',
       panNumber: supplier.panNumber || '',
     });
@@ -119,6 +121,7 @@ export default function SuppliersPage() {
       setSaving(true);
       const payload: SupplierFormData = {
         ...formData,
+        name: formData.name,
         creditLimit: toNumber(formData.creditLimit, 0),
         paymentTerms: toNumber(formData.paymentTerms, 30),
       };
@@ -528,7 +531,7 @@ export default function SuppliersPage() {
                 <div>
                   <p className="font-medium">Payment</p>
                   <p className="text-sm text-slate-500">
-                    {new Date(txn.createdAt).toLocaleDateString()}
+                    {new Date(txn.createdAt ?? Date.now()).toLocaleDateString()}
                   </p>
                 </div>
                 <span className="text-green-600">

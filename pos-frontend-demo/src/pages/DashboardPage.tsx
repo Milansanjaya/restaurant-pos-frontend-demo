@@ -170,7 +170,7 @@ export default function DashboardPage() {
 
         console.log('Sample sale:', allSales[0]);
         console.log('Today string:', todayStr);
-        console.log('First sale date:', allSales[0] ? new Date(allSales[0].createdAt).toISOString().split('T')[0] : 'none');
+        console.log('First sale date:', allSales[0]?.createdAt ? new Date(allSales[0].createdAt).toISOString().split('T')[0] : 'none');
 
         // Build REAL daily revenue data from actual sales
         const dailyRevenue: Record<string, { revenue: number; cost: number; orders: number }> = {};
@@ -190,7 +190,8 @@ export default function DashboardPage() {
         console.log('Total sales fetched:', allSales.length);
         
         allSales.forEach(sale => {
-          const saleDate = new Date(sale.createdAt).toISOString().split('T')[0];
+          const saleDate = sale.createdAt ? new Date(sale.createdAt).toISOString().split('T')[0] : '';
+          if (!saleDate) return;
           
           if (dailyRevenue[saleDate]) {
             dailyRevenue[saleDate].revenue += sale.grandTotal || 0;
@@ -255,11 +256,11 @@ export default function DashboardPage() {
           hourlyRevenue[h] = { revenue: 0, orders: 0 };
         }
         
-        const todaySales = allSales.filter(s => new Date(s.createdAt).toISOString().split('T')[0] === todayStr);
+        const todaySales = allSales.filter(s => s.createdAt && new Date(s.createdAt).toISOString().split('T')[0] === todayStr);
         console.log('Today sales count:', todaySales.length);
         
         todaySales.forEach(sale => {
-          const hour = new Date(sale.createdAt).getHours();
+          const hour = sale.createdAt ? new Date(sale.createdAt).getHours() : 0;
           hourlyRevenue[hour].revenue += sale.grandTotal || 0;
           hourlyRevenue[hour].orders += 1;
         });
@@ -271,7 +272,7 @@ export default function DashboardPage() {
           const revenuePerHour = summaryData.todayRevenue / peakHours.length;
           peakHours.forEach(hour => {
             hourlyRevenue[hour].revenue = revenuePerHour;
-            hourlyRevenue[hour].orders = Math.ceil(summaryData.todayOrders / peakHours.length);
+            hourlyRevenue[hour].orders = Math.ceil((summaryData.todayOrders ?? 0) / peakHours.length);
           });
         }
 

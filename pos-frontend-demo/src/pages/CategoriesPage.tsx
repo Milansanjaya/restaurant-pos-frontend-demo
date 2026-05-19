@@ -120,7 +120,7 @@ export default function CategoriesPage() {
       description: category.description || '',
       parentId: category.parentId || '',
       icon: category.icon || '',
-      displayOrder: category.displayOrder,
+      displayOrder: category.displayOrder ?? '',
     });
     setModalOpen(true);
   };

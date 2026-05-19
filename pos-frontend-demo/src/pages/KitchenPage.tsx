@@ -11,16 +11,22 @@ const statusFlow: KitchenOrderStatus[] = ['PENDING', 'PREPARING', 'READY', 'SERV
 
 const statusColors: Record<KitchenOrderStatus, 'warning' | 'info' | 'success' | 'default'> = {
   PENDING: 'warning',
+  IN_PROGRESS: 'info',
   PREPARING: 'info',
   READY: 'success',
   SERVED: 'default',
+  COMPLETED: 'default',
+  CANCELLED: 'default',
 };
 
 const statusLabels: Record<KitchenOrderStatus, string> = {
-  PENDING: '🔴 Pending',
-  PREPARING: '🟡 Preparing',
-  READY: '🟢 Ready',
-  SERVED: '✅ Served',
+  PENDING: 'Pending',
+  IN_PROGRESS: 'In Progress',
+  PREPARING: 'Preparing',
+  READY: 'Ready',
+  SERVED: 'Served',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
 };
 
 export default function KitchenPage() {
@@ -36,10 +42,10 @@ export default function KitchenPage() {
 
   // Debug: Log user info on mount
   useEffect(() => {
-    console.log('👤 Current User:', user);
-    console.log('🏢 Branch ID:', user?.branch_id);
-    console.log('👮 Role:', user?.role?.name);
-    console.log('🔑 Permissions:', user?.permissions);
+    console.log('Current User:', user);
+    console.log('Branch ID:', user?.branch_id);
+    console.log('Role:', user?.role?.name);
+    console.log('Permissions:', user?.permissions);
   }, [user]);
 
   const loadDebug = async () => {
@@ -47,7 +53,7 @@ export default function KitchenPage() {
       const data = await kitchenApi.debug();
       setDebugInfo(data);
       setShowDebug(true);
-      console.log('🔍 Debug Info:', data);
+      console.log('Debug Info:', data);
     } catch (err) {
       console.error('Debug error:', err);
     }
@@ -56,12 +62,12 @@ export default function KitchenPage() {
   const loadDashboard = useCallback(async () => {
     try {
       const data = await kitchenApi.getDashboard();
-      console.log('🍳 Kitchen Dashboard Data:', data);
-      console.log('📊 Summary:', data.summary);
-      console.log('📋 Orders count:', data.orders?.length);
+      console.log('Kitchen Dashboard Data:', data);
+      console.log('Summary:', data.summary);
+      console.log('Orders count:', data.orders?.length);
       setDashboard(data);
     } catch (err: any) {
-      console.error('❌ Failed to load kitchen dashboard:', err);
+      console.error('Failed to load kitchen dashboard:', err);
       console.error('Error details:', err.response?.data || err);
     } finally {
       setLoading(false);
@@ -287,7 +293,7 @@ export default function KitchenPage() {
         actions={
           <div className="flex gap-2">
             <Button variant="ghost" onClick={loadDebug}>
-              🔍 Debug
+              Debug
             </Button>
             <Button variant="secondary" onClick={loadDashboard}>
               Refresh
@@ -301,8 +307,8 @@ export default function KitchenPage() {
         {showDebug && debugInfo && (
           <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <div className="flex justify-between items-start mb-2">
-              <h3 className="font-bold text-yellow-800">🔍 Debug Info</h3>
-              <button onClick={() => setShowDebug(false)} className="text-yellow-600 hover:text-yellow-800">✕</button>
+              <h3 className="font-bold text-yellow-800">Debug Info</h3>
+              <button onClick={() => setShowDebug(false)} className="text-yellow-600 hover:text-yellow-800">x</button>
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
@@ -314,12 +320,12 @@ export default function KitchenPage() {
                 <p><strong>Total Active Orders:</strong> {debugInfo.kitchenData?.totalActiveOrders}</p>
                 <p><strong>Orders for Your Branch:</strong> {debugInfo.kitchenData?.ordersForUserBranch}</p>
                 <p><strong>Branch IDs in Orders:</strong> {debugInfo.kitchenData?.allBranchIdsInOrders?.join(', ') || 'None'}</p>
-                <p><strong>Branch Match:</strong> {debugInfo.kitchenData?.branchMatch ? '✅ Yes' : '❌ No - This is the problem!'}</p>
+                <p><strong>Branch Match:</strong> {debugInfo.kitchenData?.branchMatch ? 'Yes' : 'No - This is the problem!'}</p>
               </div>
             </div>
             {!debugInfo.kitchenData?.branchMatch && debugInfo.kitchenData?.totalActiveOrders > 0 && (
               <div className="mt-3 p-2 bg-red-100 border border-red-300 rounded text-red-800 text-sm">
-                <strong>⚠️ Issue Found:</strong> Your user branch_id (<code>{debugInfo.currentUser?.branch_id}</code>) doesn't match any kitchen orders.
+                <strong>Issue Found:</strong> Your user branch_id (<code>{debugInfo.currentUser?.branch_id}</code>) doesn't match any kitchen orders.
                 <br />Orders exist with branch_id: <code>{debugInfo.kitchenData?.allBranchIdsInOrders?.join(', ')}</code>
                 <br /><strong>Fix:</strong> Admin needs to update this user's branch_id to match.
               </div>
@@ -609,3 +615,4 @@ export default function KitchenPage() {
     </Layout>
   );
 }
+

@@ -1104,8 +1104,8 @@ function SupplierReturnsPanel() {
     return (grn.items || []).map((it) => {
       const maxQty = (it.receivedQuantity ?? it.orderedQuantity ?? 0) as number;
       return {
-        product_id: it.product_id,
-        productName: it.productName,
+        product_id: it.productId ?? it.product_id ?? '',
+        productName: it.productName || 'Unknown product',
         maxQty,
         unitPrice: it.unitPrice,
         returnQty: 0,
@@ -1447,7 +1447,7 @@ function SupplierReturnsPanel() {
                   </div>
                   <div>
                     <span className="text-slate-500">Received:</span>{' '}
-                    <span className="font-semibold">{new Date(selectedGrn.receivedDate).toLocaleDateString()}</span>
+                    <span className="font-semibold">{new Date(selectedGrn.receivedDate ?? selectedGrn.grnDate ?? selectedGrn.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>

@@ -2,13 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { Layout, PageHeader, PageContent, Card, Button, Input, PageLoader } from '../components';
 import { configApi } from '../api';
 import notify from '../utils/notify';
-import type { TaxSetting } from '../types';
+import type { TaxFormState } from '../types';
 import { formatMoneyValue } from '../money';
 import { useAuthStore } from '../store/auth.store';
 
 type Numberish = number | '';
-
-type TaxFormState = Omit<TaxSetting, 'rate'> & { rate: Numberish };
+type TaxFormUiState = TaxFormState & { rate: Numberish };
 
 const toNumber = (v: Numberish, fallback = 0) => {
   if (v === '') return fallback;
@@ -29,7 +28,7 @@ export default function SettingsPage() {
     reached: boolean;
   } | null>(null);
 
-  const [taxes, setTaxes] = useState<TaxFormState[]>([]);
+  const [taxes, setTaxes] = useState<TaxFormUiState[]>([]);
   const [currency, setCurrency] = useState<{ code: string; symbol: string; position: 'BEFORE' | 'AFTER' }>({ 
     code: 'USD', 
     symbol: '$', 
@@ -79,7 +78,12 @@ export default function SettingsPage() {
           rate: typeof t.rate === 'number' ? t.rate : '',
         }))
       );
-      setCurrency(data.currency || { code: 'USD', symbol: '$', position: 'BEFORE' as const });
+      const incomingCurrency = data.currency;
+      setCurrency(
+        typeof incomingCurrency === 'string'
+          ? { code: incomingCurrency, symbol: incomingCurrency === 'LKR' ? 'Rs' : incomingCurrency, position: 'BEFORE' as const }
+          : incomingCurrency || { code: 'USD', symbol: '$', position: 'BEFORE' as const }
+      );
       setInvoicePrefix(data.invoiceFormat?.prefix || 'INV');
       setInvoiceHeader(data.invoiceFormat?.header || '');
       setInvoiceFooter(data.invoiceFormat?.footer || 'Thank you!');
@@ -189,7 +193,7 @@ export default function SettingsPage() {
   const handleSave = async () => {
     try {
       setSaving(true);
-      const taxesPayload: TaxSetting[] = taxes.map((t) => ({
+      const taxesPayload: TaxFormState[] = taxes.map((t) => ({
         ...t,
         rate: toNumber(t.rate, 0),
       }));

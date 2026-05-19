@@ -291,6 +291,10 @@ export default function ProductsPage() {
       setSaving(true);
       const payload: ProductFormData = {
         ...formData,
+        name: formData.name,
+        sku: formData.sku,
+        category: formData.category,
+        unit: formData.unit,
         price: toNumber(formData.price, 0),
         cost: toNumber(formData.cost, 0),
         taxRate: toNumber(formData.taxRate, 0),

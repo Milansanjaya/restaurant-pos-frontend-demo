@@ -114,7 +114,7 @@ export default function GRNPage() {
     const supplierName = (grn.supplier_id && typeof grn.supplier_id === 'object')
       ? grn.supplier_id.name.toLowerCase()
       : '';
-    const status = grn.status.toLowerCase();
+    const status = (grn.status || '').toLowerCase();
     const paymentStatus = (grn.paymentStatus || '').toLowerCase();
     const poNumber = (grn.purchaseOrder_id && typeof grn.purchaseOrder_id === 'object')
       ? grn.purchaseOrder_id.poNumber.toLowerCase()
@@ -213,18 +213,19 @@ export default function GRNPage() {
   const openCreateModal = (po: PurchaseOrder) => {
     setEditingId(null);
     setSelectedPO(po);
-    const supplierId = typeof po.supplier_id === 'object' ? po.supplier_id._id : po.supplier_id;
+    const supplierId = (typeof po.supplier_id === 'object' ? po.supplier_id._id : po.supplier_id) || '';
     
 
     const items: GRNItemForm[] = po.items.map((item) => ({
-      product_id: item.product_id,
+      productId: item.productId,
+      product_id: item.product_id ?? item.productId,
       productName: item.productName,
       orderedQuantity: item.quantity,
       receivedQuantity: item.quantity,
       unitPrice: item.unitPrice,
       totalPrice: item.totalPrice,
       qualityStatus: 'ACCEPTED' as QualityStatus,
-      batchNumber: generateBatchNumber(item.productName),
+      batchNumber: generateBatchNumber(item.productName ?? 'PRD'),
       expiryDate: '',
     }));
 
@@ -242,8 +243,8 @@ export default function GRNPage() {
     setEditingId(grn._id);
     setSelectedPO(null);
     setFormData({
-      purchaseOrder_id: typeof grn.purchaseOrder_id === 'object' ? grn.purchaseOrder_id._id : grn.purchaseOrder_id,
-      supplier_id: typeof grn.supplier_id === 'object' ? grn.supplier_id._id : grn.supplier_id,
+      purchaseOrder_id: (typeof grn.purchaseOrder_id === 'object' ? grn.purchaseOrder_id._id : grn.purchaseOrder_id) || '',
+      supplier_id: (typeof grn.supplier_id === 'object' ? grn.supplier_id._id : grn.supplier_id) || '',
       items: grn.items as GRNItemForm[],
       totalAmount: grn.totalAmount,
       notes: grn.notes || '',
@@ -307,17 +308,28 @@ export default function GRNPage() {
     const payloadItems: GRNItem[] = formData.items.map((item) => {
       const receivedQuantity = Number(item.receivedQuantity);
       return {
-        ...item,
+        productId: item.productId,
+        product_id: item.product_id,
+        productName: item.productName,
+        orderedQuantity: item.orderedQuantity,
         receivedQuantity,
+        unitPrice: item.unitPrice,
         totalPrice: receivedQuantity * item.unitPrice,
+        batchNumber: item.batchNumber,
+        expiryDate: item.expiryDate,
+        qualityStatus: item.qualityStatus,
+        rejectionReason: (item as any).rejectionReason,
+        purchasedQuantity: (item as any).purchasedQuantity,
       };
     });
 
     // Prepare payload with explicit batches array
     const payload: GRNFormData = {
-      ...formData,
+      purchaseOrder_id: formData.purchaseOrder_id,
+      supplier_id: formData.supplier_id,
+      notes: formData.notes,
       items: payloadItems,
-      totalAmount: payloadItems.reduce((sum, i) => sum + i.totalPrice, 0),
+      totalAmount: payloadItems.reduce((sum, i) => sum + (i.totalPrice ?? 0), 0),
       batches,
     };
 
@@ -468,7 +480,7 @@ export default function GRNPage() {
         <div class="details">
           <div><strong>Supplier:</strong> ${escapeHtml(supplierName)}</div>
           <div><strong>PO Number:</strong> ${escapeHtml(poNumber)}</div>
-          <div><strong>Received Date:</strong> ${new Date(grn.receivedDate).toLocaleDateString()}</div>
+          <div><strong>Received Date:</strong> ${new Date(grn.receivedDate ?? grn.grnDate ?? grn.createdAt).toLocaleDateString()}</div>
           <div><strong>Status:</strong> ${escapeHtml(grn.status)}</div>
           ${grn.notes ? `<div><strong>Notes:</strong> ${escapeHtml(grn.notes)}</div>` : ''}
         </div>
@@ -605,7 +617,7 @@ export default function GRNPage() {
     {
       key: 'receivedDate',
       header: 'Received',
-      render: (item: GRN) => new Date(item.receivedDate).toLocaleDateString(),
+      render: (item: GRN) => new Date(item.receivedDate ?? item.grnDate ?? item.createdAt).toLocaleDateString(),
     },
     {
       key: 'actions',
@@ -886,7 +898,7 @@ export default function GRNPage() {
               </div>
               <div>
                 <label className="text-sm font-medium text-slate-700">Received Date</label>
-                <p className="text-slate-900">{new Date(selectedGRN.receivedDate).toLocaleDateString()}</p>
+                <p className="text-slate-900">{new Date(selectedGRN.receivedDate ?? selectedGRN.grnDate ?? selectedGRN.createdAt).toLocaleDateString()}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-slate-700">Total Amount</label>
@@ -1003,7 +1015,7 @@ export default function GRNPage() {
                       <div>
                         <p className="font-medium">{p.paymentMethod}</p>
                         <p className="text-sm text-slate-500">
-                          {new Date(p.createdAt || p.date).toLocaleString()}
+                          {new Date(p.createdAt ?? p.date ?? Date.now()).toLocaleString()}
                           {p.reference ? ` • Ref: ${p.reference}` : ''}
                         </p>
                         {p.notes ? <p className="text-xs text-slate-500 mt-1">{p.notes}</p> : null}
@@ -1037,7 +1049,7 @@ export default function GRNPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {selectedGRN.batches.map((batch, idx) => {
+                      {selectedGRN.batches.map((batch: GRNBatch, idx: number) => {
                         // Find product name from items
                         const item = selectedGRN.items.find(i => 
                           i.product_id === batch.product_id || 

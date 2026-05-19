@@ -15,6 +15,7 @@ const statusColors: Record<TableStatus, 'success' | 'warning' | 'danger' | 'info
   AVAILABLE: 'success',
   OCCUPIED: 'danger',
   RESERVED: 'warning',
+  MAINTENANCE: 'warning',
   CLEANING: 'info',
 };
 

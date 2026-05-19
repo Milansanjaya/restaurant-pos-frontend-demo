@@ -883,7 +883,7 @@ export default function ComprehensiveReportsPage() {
                       <tr key={sale._id} className="hover:bg-slate-50">
                         <td className="px-4 py-3 text-sm font-medium text-blue-600">{sale.invoiceNumber}</td>
                         <td className="px-4 py-3 text-sm text-slate-600">
-                          {new Date(sale.createdAt).toLocaleDateString()}
+                          {sale.createdAt ? new Date(sale.createdAt).toLocaleDateString() : '-'}
                         </td>
                         <td className="px-4 py-3 text-sm text-slate-600">
                           {typeof sale.customer_id === 'object' && (sale.customer_id as any)?.name ? (sale.customer_id as any).name : 'Walk-in'}
@@ -1051,7 +1051,7 @@ export default function ComprehensiveReportsPage() {
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-sm text-slate-600">
-                          {new Date(customer.createdAt).toLocaleDateString()}
+                          {customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : '-'}
                         </td>
                       </tr>
                     ))}
@@ -1177,7 +1177,7 @@ export default function ComprehensiveReportsPage() {
                           {typeof grn.supplier_id === 'object' ? (grn.supplier_id as any)?.name : '-'}
                         </td>
                         <td className="px-4 py-3 text-sm text-slate-600">
-                          {new Date(grn.receivedDate).toLocaleDateString()}
+                          {grn.receivedDate ? new Date(grn.receivedDate).toLocaleDateString() : '-'}
                         </td>
                         <td className="px-4 py-3 text-sm text-slate-600">{grn.items?.length || 0}</td>
                         <td className="px-4 py-3">
@@ -1310,7 +1310,7 @@ export default function ComprehensiveReportsPage() {
                         <td className="px-4 py-3 text-sm font-medium text-slate-900">{reservation.customerName}</td>
                         <td className="px-4 py-3 text-sm text-slate-600">{reservation.customerPhone}</td>
                         <td className="px-4 py-3 text-sm text-slate-600">
-                          {new Date(reservation.reservationDateTime).toLocaleString()}
+                          {reservation.reservationDateTime ? new Date(reservation.reservationDateTime).toLocaleString() : '-'}
                         </td>
                         <td className="px-4 py-3 text-sm text-slate-600">
                           {typeof reservation.table === 'object' ? reservation.table?.tableNumber : '-'}

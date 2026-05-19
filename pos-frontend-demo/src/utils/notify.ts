@@ -4,7 +4,7 @@
  */
 
 const notify = {
-  success: (message: string) => {
+  success: (message: string, _options?: { id?: string; duration?: number }) => {
     console.log('✓ Success:', message);
     // Using alert for now - can be replaced with react-hot-toast or similar
     if (typeof window !== 'undefined') {
@@ -14,7 +14,7 @@ const notify = {
     }
   },
 
-  error: (message: string) => {
+  error: (message: string, _options?: { id?: string; duration?: number }) => {
     console.error('✗ Error:', message);
     // Using alert for now - can be replaced with react-hot-toast or similar
     if (typeof window !== 'undefined') {
@@ -36,6 +36,14 @@ const notify = {
     if (typeof window !== 'undefined') {
       console.info(message);
     }
+  },
+
+  loading: (message: string) => {
+    console.log('⏳ Loading:', message);
+    if (typeof window !== 'undefined') {
+      console.log(message);
+    }
+    return 'loading-id'; // Return a simple ID for now
   },
 };
 

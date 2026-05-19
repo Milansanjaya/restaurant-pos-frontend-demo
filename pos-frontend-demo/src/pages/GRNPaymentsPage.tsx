@@ -294,7 +294,7 @@ export default function GRNPaymentsPage() {
     {
       key: 'date',
       header: 'Date',
-      render: (p: GRNPayment) => new Date(p.createdAt || p.date).toLocaleString(),
+      render: (p: GRNPayment) => new Date(p.createdAt ?? p.date ?? Date.now()).toLocaleString(),
     },
     {
       key: 'supplier',

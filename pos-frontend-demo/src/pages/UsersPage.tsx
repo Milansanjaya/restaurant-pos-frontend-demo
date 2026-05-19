@@ -59,7 +59,7 @@ const UsersPage: React.FC = () => {
         email: user.email,
         password: '',
         role: typeof user.role === 'string' ? user.role : user.role._id,
-        branch_id: user.branch_id,
+        branch_id: user.branch_id || '',
         isActive: user.isActive ?? true,
       });
     } else {
