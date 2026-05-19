@@ -179,7 +179,9 @@ export default function BatchesPage() {
       key: 'product',
       header: 'Product',
       render: (item: Batch) =>
-        typeof item.product_id === 'object' ? item.product_id.name : '-',
+        (item as any).product_id && typeof (item as any).product_id === 'object'
+          ? (item as any).product_id.name
+          : '-',
     },
     {
       key: 'remainingQuantity',

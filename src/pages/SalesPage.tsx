@@ -181,8 +181,15 @@ const SalesPage: React.FC = () => {
       const company = configCompany || invoice?.company;
       const headerText = invoiceFormat?.header || '';
       const footerText = invoiceFormat?.footer || '';
+      const saleForReceipt =
+        invoice?.sale && typeof invoice.sale === 'object' ? invoice.sale : sale;
 
-      const html = generateThermalReceiptHtml(invoice?.sale ?? sale, company || undefined, headerText, footerText);
+      const html = generateThermalReceiptHtml(
+        saleForReceipt,
+        company || undefined,
+        headerText,
+        footerText
+      );
 
       printWindow.document.open();
       printWindow.document.write(html);
@@ -246,9 +253,11 @@ const SalesPage: React.FC = () => {
       const company    = configCompany || invoice?.company;
       const headerText = invoiceFormat?.header || '';
       const footerText = invoiceFormat?.footer || '';
+      const saleForReceipt =
+        invoice?.sale && typeof invoice.sale === 'object' ? invoice.sale : sale;
 
       const html = generateThermalReceiptHtml(
-        invoice?.sale ?? sale,
+        saleForReceipt,
         company || undefined,
         headerText,
         footerText,

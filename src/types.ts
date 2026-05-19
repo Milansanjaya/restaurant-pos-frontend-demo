@@ -19,12 +19,13 @@ export interface User {
   email: string;
   phone?: string;
   password?: string;
-  role?: Role;
+  role?: any;
   permissions?: string[];
   branch_id?: string;
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  [key: string]: any;
 }
 
 export interface Role {
@@ -41,6 +42,7 @@ export interface Permission {
   _id: string;
   name: string;
   description?: string;
+  [key: string]: any;
 }
 
 export interface Category {
@@ -54,6 +56,7 @@ export interface Category {
   children?: Category[];
   createdAt?: string;
   updatedAt?: string;
+  [key: string]: any;
 }
 
 export interface Unit {
@@ -100,14 +103,18 @@ export interface Discount {
   name: string;
   description?: string;
   type?: DiscountType; // 'PERCENTAGE' | 'FIXED'
+  discountType?: DiscountType; // Alias
   value: number;
   applicableProducts?: string[]; // Product IDs
   applicableCategories?: string[]; // Category IDs
   startDate?: string;
   endDate?: string;
+  validFrom?: string; // Alias
+  validTo?: string; // Alias
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  [key: string]: any;
 }
 
 export interface Coupon {
@@ -146,12 +153,17 @@ export interface Customer {
   status?: CustomerStatus;
   tier?: CustomerTier;
   totalPurchases?: number;
+  totalSpent?: number; // Alias
+  dob?: string;
+  notes?: string;
   createdAt?: string;
   updatedAt?: string;
+  [key: string]: any;
 }
 
 export interface Supplier {
   _id: string;
+  code?: string;
   name: string;
   email?: string;
   phone?: string;
@@ -161,7 +173,11 @@ export interface Supplier {
   zipCode?: string;
   contactPerson?: string;
   taxId?: string;
-  paymentTerms?: string;
+  paymentTerms?: number;
+  creditLimit?: number;
+  outstandingBalance?: number;
+  gstNumber?: string;
+  panNumber?: string;
   status?: string;
   isActive?: boolean;
   createdAt?: string;
@@ -206,13 +222,22 @@ export interface Reservation {
 
 export interface Shift {
   _id: string;
-  name: string;
-  startTime: string;
-  endTime: string;
+  name?: string;
+  startTime?: string;
+  endTime?: string;
+  status?: 'OPEN' | 'CLOSED' | string;
+  openedAt?: string;
+  closedAt?: string;
+  openingCash?: number;
+  expectedCash?: number;
+  closingCash?: number;
+  cashDifference?: number;
+  cashier?: UserRef | User | string;
   description?: string;
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  [key: string]: any;
 }
 
 export interface Batch {
@@ -238,20 +263,24 @@ export interface Batch {
 export interface Inventory {
   _id: string;
   product?: Product | string;
+  product_id?: string;
   quantity: number;
+  stockQuantity?: number; // Alias
   unit?: Unit | string;
   minStock?: number;
+  lowStockThreshold?: number; // Alias
   maxStock?: number;
   lastRestockDate?: string;
   createdAt?: string;
   updatedAt?: string;
+  [key: string]: any;
 }
 
 export interface PurchaseOrder {
   _id: string;
   poNumber: string;
   supplier?: Supplier | string;
-  supplier_id?: string;
+  supplier_id?: any;
   items: PurchaseOrderItem[];
   totalAmount: number;
   taxAmount?: number;
@@ -267,22 +296,27 @@ export interface PurchaseOrder {
 }
 
 export interface PurchaseOrderItem {
-  productId: string;
+  productId?: string;
+  product_id?: string; // Alias
+  product?: Product | string;
   productName?: string;
   quantity: number;
+  orderedQuantity?: number;
   unitPrice: number;
   totalPrice: number;
+  [key: string]: any;
 }
 
 export interface GRN {
   _id: string;
   grnNumber: string;
   purchaseOrder?: PurchaseOrder | string;
-  purchaseOrder_id?: string;
+  purchaseOrder_id?: any;
   supplier?: Supplier | string;
-  supplier_id?: string;
+  supplier_id?: any;
   items: GRNItem[];
   totalAmount: number;
+  paidAmount?: number;
   totalTaxAmount?: number;
   paymentStatus?: string;
   qualityStatus?: QualityStatus;
@@ -291,6 +325,8 @@ export interface GRN {
   grnDate: string;
   receivedDate?: string;
   receivedBy?: UserRef;
+  approvedAt?: string;
+  batches?: GRNBatch[];
   payments?: GRNPayment[];
   createdAt?: string;
   updatedAt?: string;
@@ -298,24 +334,44 @@ export interface GRN {
 }
 
 export interface GRNItem {
-  productId: string;
+  productId?: string;
+  product_id?: string; // Alias
   productName?: string;
-  orderedQuantity: number;
+  orderedQuantity?: number;
+  purchasedQuantity?: number; // Alias
   receivedQuantity: number;
-  unitPrice: number;
+  unitPrice?: number;
+  totalPrice?: number;
   batchNumber?: string;
   expiryDate?: string;
   qualityStatus?: QualityStatus;
+  rejectionReason?: string;
+  [key: string]: any;
+}
+
+export interface GRNBatch {
+  batchNumber: string;
+  product_id: string;
+  expiryDate: string;
+  quantity: number;
+  costPerUnit: number;
+  [key: string]: any;
 }
 
 export interface GRNPayment {
   _id?: string;
   amount: number;
-  method: GRNPaymentMethod;
+  method?: GRNPaymentMethod;
+  paymentMethod?: GRNPaymentMethod | string;
   paymentDate?: string;
+  date?: string;
   referenceNumber?: string;
+  reference?: string;
+  supplier_id?: string | Supplier;
+  grn_id?: string | GRN;
   notes?: string;
   createdAt?: string;
+  [key: string]: any;
 }
 
 export interface Sale {
@@ -359,12 +415,20 @@ export interface SaleItem {
 export interface Invoice {
   _id: string;
   invoiceNumber: string;
-  sale?: Sale | string;
+  sale?: Sale;
+  company?: {
+    name?: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+    logo?: string;
+  };
   amount: number;
   issuedDate?: string;
   dueDate?: string;
   status?: string;
   createdAt?: string;
+  [key: string]: any;
 }
 
 export interface OrderReturn {
@@ -381,6 +445,7 @@ export interface OrderReturn {
   processedBy?: UserRef;
   createdAt?: string;
   updatedAt?: string;
+  [key: string]: any;
 }
 
 export interface OrderReturnItem {
@@ -390,14 +455,17 @@ export interface OrderReturnItem {
   unitPrice: number;
   reason?: string;
   refundAmount: number;
+  costAmount?: number;
+  [key: string]: any;
 }
 
 export interface SupplierReturn {
   _id: string;
   returnNumber: string;
   supplier?: Supplier | string;
-  supplier_id?: string | Supplier;
+  supplier_id?: any;
   grn?: GRN | string;
+  grn_id?: string;
   items: SupplierReturnItem[];
   reason?: string;
   totalReturnAmount: number;
@@ -412,12 +480,15 @@ export interface SupplierReturn {
 }
 
 export interface SupplierReturnItem {
-  productId: string;
+  productId?: string;
+  product_id?: string; // Alias
   productName?: string;
   quantity: number;
   unitPrice: number;
+  totalPrice?: number; // Alias
   reason?: string;
-  refundAmount: number;
+  refundAmount?: number;
+  [key: string]: any;
 }
 
 export interface KitchenOrder {
@@ -432,6 +503,7 @@ export interface KitchenOrder {
   completedAt?: string;
   createdAt?: string;
   updatedAt?: string;
+  [key: string]: any;
 }
 
 export interface KitchenOrderItem {
@@ -440,6 +512,7 @@ export interface KitchenOrderItem {
   quantity: number;
   specialRequests?: string;
   status?: KitchenOrderStatus;
+  [key: string]: any;
 }
 
 export interface LoyaltyAccount {
@@ -451,6 +524,7 @@ export interface LoyaltyAccount {
   transactions?: LoyaltyTransaction[];
   createdAt?: string;
   updatedAt?: string;
+  [key: string]: any;
 }
 
 export interface LoyaltyTransaction {
@@ -460,6 +534,7 @@ export interface LoyaltyTransaction {
   reference?: string;
   description?: string;
   createdAt?: string;
+  [key: string]: any;
 }
 
 export interface InventoryAdjustment {
@@ -471,31 +546,40 @@ export interface InventoryAdjustment {
   notes?: string;
   adjustedBy?: UserRef;
   createdAt?: string;
+  [key: string]: any;
 }
 
 // ==================== Form Data Types ====================
 
 export interface CategoryFormData {
-  name: string;
+  name?: string;
   description?: string;
   parentId?: string;
   icon?: string;
   displayOrder?: number;
   isActive?: boolean;
+  [key: string]: any;
 }
 
 export interface ProductFormData {
-  name: string;
+  name?: string;
   description?: string;
-  category: string;
-  unit: string;
+  category?: string;
+  unit?: string;
   barcode?: string;
   sku?: string;
   costPrice?: number;
-  sellingPrice: number;
+  cost?: number; // Alias
+  sellingPrice?: number;
+  price?: number; // Alias
   discount?: string;
   taxPercentage?: number;
+  taxRate?: number; // Alias
+  trackStock?: boolean;
+  lowStockThreshold?: number;
+  preparationTime?: number;
   isActive?: boolean;
+  [key: string]: any;
 }
 
 export interface CustomerFormData {
@@ -507,10 +591,14 @@ export interface CustomerFormData {
   state?: string;
   zipCode?: string;
   tier?: CustomerTier;
+  dob?: string;
+  notes?: string;
+  [key: string]: any;
 }
 
 export interface SupplierFormData {
-  name: string;
+  code?: string;
+  name?: string;
   email?: string;
   phone?: string;
   address?: string;
@@ -519,33 +607,47 @@ export interface SupplierFormData {
   zipCode?: string;
   contactPerson?: string;
   taxId?: string;
-  paymentTerms?: string;
+  paymentTerms?: string | number;
+  creditLimit?: number;
+  gstNumber?: string;
+  panNumber?: string;
   isActive?: boolean;
+  [key: string]: any;
 }
 
 export interface DiscountFormData {
-  name: string;
+  name?: string;
   description?: string;
-  type: DiscountType;
+  type?: DiscountType;
+  discountType?: DiscountType; // Alias
   value: number;
   applicableProducts?: string[];
   applicableCategories?: string[];
   startDate?: string;
   endDate?: string;
+  validFrom?: string; // Alias
+  validTo?: string; // Alias
   isActive?: boolean;
+  [key: string]: any;
 }
 
 export interface CouponFormData {
   code: string;
   description?: string;
-  discountType: DiscountType;
-  discountValue: number;
+  discountType?: DiscountType;
+  discountValue?: number;
+  value?: number; // Alias
   maxUses?: number;
+  usageLimit?: number; // Alias
   minOrderValue?: number;
   maxDiscountValue?: number;
+  maxDiscount?: number; // Alias
   validFrom?: string;
   validUntil?: string;
+  validTo?: string; // Alias
+  expiryDate?: string; // Alias
   isActive?: boolean;
+  [key: string]: any;
 }
 
 export interface UnitFormData {
@@ -557,6 +659,7 @@ export interface UnitFormData {
   baseUnit?: string;
   conversionFactor?: number;
   isActive?: boolean;
+  [key: string]: any;
 }
 
 export interface ReservationFormData {
@@ -564,11 +667,15 @@ export interface ReservationFormData {
   customerPhone?: string;
   customerEmail?: string;
   tableId: string;
-  reservationDate: string;
-  reservationTime: string;
-  numberOfGuests: number;
+  reservationDate?: string;
+  reservationDateTime?: string; // Alias
+  reservationTime?: string;
+  numberOfGuests?: number;
+  guestCount?: number; // Alias
   specialRequests?: string;
+  notes?: string;
   status?: ReservationStatus;
+  [key: string]: any;
 }
 
 export interface TableFormData {
@@ -577,40 +684,54 @@ export interface TableFormData {
   location?: string;
   section?: string;
   notes?: string;
+  [key: string]: any;
 }
 
 export interface GRNFormData {
-  grnNumber: string;
-  purchaseOrder: string;
-  supplier: string;
+  grnNumber?: string;
+  purchaseOrder?: string;
+  purchaseOrder_id?: string; // Alias
+  supplier?: string;
+  supplier_id?: string; // Alias
   items: GRNItem[];
-  totalAmount: number;
-  grnDate: string;
+  totalAmount?: number;
+  notes?: string;
+  batches?: GRNBatch[];
+  grnDate?: string;
+  [key: string]: any;
 }
 
 export interface PurchaseOrderFormData {
-  poNumber: string;
-  supplier: string;
+  poNumber?: string;
+  supplier?: string;
+  supplier_id?: string; // Alias
   items: PurchaseOrderItem[];
+  totalAmount?: number;
   notes?: string;
   expectedDeliveryDate?: string;
+  deliveryDate?: string; // Alias
+  [key: string]: any;
 }
 
 export interface SupplierReturnFormData {
-  returnNumber: string;
-  supplier: string;
+  returnNumber?: string;
+  supplier?: string;
   supplier_id?: string;
-  grn: string;
+  grn?: string;
+  grn_id?: string; // Alias
   items: SupplierReturnItem[];
   reason?: string;
   notes?: string;
-  returnDate: string;
+  totalAmount?: number;
+  returnDate?: string;
+  [key: string]: any;
 }
 
 export interface RoleFormData {
   name: string;
   description?: string;
   permissions: string[];
+  [key: string]: any;
 }
 
 // ==================== Dashboard & Report Types ====================
@@ -620,25 +741,34 @@ export interface DashboardSummary {
   totalOrders: number;
   totalCustomers: number;
   averageOrderValue: number;
+  todayRevenue?: number;
+  todayOrders?: number;
+  todayProfit?: number;
+  lowStockCount?: number;
+  pendingKitchenOrders?: number;
   revenueChart: RevenueChartPoint[];
   topProducts: TopProduct[];
   recentOrders: Sale[];
   expiryAlert: ExpiryDashboard;
   kitchenDashboard: KitchenDashboard;
+  [key: string]: any;
 }
 
 export interface RevenueChartPoint {
   date: string;
   revenue: number;
   orders: number;
+  [key: string]: any;
 }
 
 export interface TopProduct {
   productId: string;
   productName: string;
+  name?: string; // Alias
   quantitySold: number;
   revenue: number;
   trend?: number;
+  [key: string]: any;
 }
 
 export interface DailyReport {
@@ -651,18 +781,21 @@ export interface DailyReport {
   totalOrders: number;
   averageOrderValue: number;
   paymentMethods: PaymentMethodSummary[];
+  [key: string]: any;
 }
 
 export interface PaymentMethodSummary {
   method: string;
   count: number;
   amount: number;
+  [key: string]: any;
 }
 
 export interface PaymentSummary {
-  totalPayments: number;
-  totalAmount: number;
-  methods: PaymentMethodSummary[];
+  totalPayments?: number;
+  totalAmount?: number;
+  methods?: PaymentMethodSummary[];
+  [key: string]: any;
 }
 
 export interface ProfitReport {
@@ -672,6 +805,7 @@ export interface ProfitReport {
   totalCost: number;
   totalProfit: number;
   profitMargin: number;
+  [key: string]: any;
 }
 
 export interface ProfitReportDay {
@@ -702,10 +836,11 @@ export interface ExpiryDashboard {
 }
 
 export interface KitchenDashboard {
-  pendingOrders: KitchenOrder[];
-  inProgressCount: number;
-  completedTodayCount: number;
-  averagePrepTime: number;
+  pendingOrders?: KitchenOrder[];
+  inProgressCount?: number;
+  completedTodayCount?: number;
+  averagePrepTime?: number;
+  [key: string]: any;
 }
 
 export interface SaleFilters {
@@ -721,15 +856,18 @@ export interface SaleFilters {
   status?: string;
   minAmount?: number;
   maxAmount?: number;
+  [key: string]: any;
 }
 
 // ==================== Payment & Transaction Types ====================
 
 export interface PaymentData {
-  method: string;
+  method?: string;
+  paymentMethod?: string; // Alias
   amount: number;
   referenceNumber?: string;
   notes?: string;
+  [key: string]: any;
 }
 
 export interface RefundData {
@@ -737,6 +875,7 @@ export interface RefundData {
   amount: number;
   method?: string;
   notes?: string;
+  [key: string]: any;
 }
 
 export interface CloseSaleData {
@@ -744,6 +883,7 @@ export interface CloseSaleData {
   paymentAmount: number;
   changeAmount?: number;
   referenceNumber?: string;
+  [key: string]: any;
 }
 
 export type GRNPaymentMethod = 'CASH' | 'CHEQUE' | 'BANK_TRANSFER' | 'CREDIT';
@@ -751,6 +891,7 @@ export type GRNPaymentMethod = 'CASH' | 'CHEQUE' | 'BANK_TRANSFER' | 'CREDIT';
 export interface GRNPaymentMethodObject {
   type: GRNPaymentMethod;
   details?: string;
+  [key: string]: any;
 }
 
 export interface SupplierPaymentData {
@@ -759,6 +900,7 @@ export interface SupplierPaymentData {
   method: string;
   referenceNumber?: string;
   notes?: string;
+  [key: string]: any;
 }
 
 export interface SupplierTransaction {
@@ -766,9 +908,11 @@ export interface SupplierTransaction {
   supplierId: string;
   amount: number;
   type: 'CREDIT' | 'DEBIT';
+  transactionType?: 'PAYMENT' | 'PURCHASE' | 'CREDIT' | 'DEBIT' | string;
   reference?: string;
   description?: string;
   createdAt?: string;
+  [key: string]: any;
 }
 
 export interface WalletTransaction {
@@ -779,6 +923,7 @@ export interface WalletTransaction {
   description?: string;
   reference?: string;
   createdAt?: string;
+  [key: string]: any;
 }
 
 export interface WalletTopupData {
@@ -786,18 +931,23 @@ export interface WalletTopupData {
   amount: number;
   paymentMethod: string;
   referenceNumber?: string;
+  [key: string]: any;
 }
 
 export interface WalletPaymentData {
   customerId: string;
   amount: number;
   saleId?: string;
+  [key: string]: any;
 }
 
 export interface RedeemPointsData {
-  customerId: string;
+  customerId?: string;
+  customer_id?: string; // Alias
   points: number;
+  sale_id?: string;
   reason?: string;
+  [key: string]: any;
 }
 
 // ==================== Status/Enum Types ====================
@@ -806,7 +956,7 @@ export type TableStatus = 'AVAILABLE' | 'OCCUPIED' | 'RESERVED' | 'MAINTENANCE' 
 
 export type AlertStatus = 'NORMAL' | 'WARNING' | 'CRITICAL' | 'EXPIRED';
 
-export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'SEATED' | 'CANCELLED' | 'COMPLETED';
+export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'SEATED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW';
 
 export type OrderType = 'DINE_IN' | 'TAKEAWAY' | 'DELIVERY';
 
@@ -814,19 +964,19 @@ export type DiscountType = 'PERCENTAGE' | 'FIXED' | 'FLAT';
 
 export type UnitType = 'WEIGHT' | 'VOLUME' | 'COUNT' | 'LENGTH';
 
-export type KitchenOrderStatus = 'PENDING' | 'IN_PROGRESS' | 'READY' | 'COMPLETED' | 'CANCELLED';
+export type KitchenOrderStatus = 'PENDING' | 'PREPARING' | 'READY' | 'SERVED';
 
 export type BatchStatus = 'ACTIVE' | 'EXPIRED' | 'EXPIRED_REMOVED' | 'BLOCKED';
 
 export type CustomerStatus = 'ACTIVE' | 'INACTIVE' | 'BLOCKED';
 
-export type CustomerTier = 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM';
+export type CustomerTier = 'BASIC' | 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM';
 
-export type POStatus = 'DRAFT' | 'SUBMITTED' | 'ACCEPTED' | 'PARTIAL_RECEIVED' | 'RECEIVED' | 'PENDING' | 'CANCELLED';
+export type POStatus = 'DRAFT' | 'SUBMITTED' | 'ACCEPTED' | 'APPROVED' | 'PARTIAL' | 'PARTIAL_RECEIVED' | 'RECEIVED' | 'PENDING' | 'CANCELLED';
 
-export type QualityStatus = 'APPROVED' | 'REJECTED' | 'PENDING_REVIEW';
+export type QualityStatus = 'APPROVED' | 'ACCEPTED' | 'REJECTED' | 'PARTIAL' | 'PENDING_REVIEW';
 
-export type ReturnStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'PROCESSED' | 'CANCELLED';
+export type ReturnStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'PROCESSED' | 'COMPLETED' | 'CANCELLED';
 
 // ==================== Utility Types ====================
 
@@ -834,6 +984,7 @@ export interface UserRef {
   _id: string;
   name: string;
   email?: string;
+  [key: string]: any;
 }
 
 export interface PaginationParams {
@@ -841,20 +992,56 @@ export interface PaginationParams {
   limit?: number;
   sort?: string;
   order?: 'ASC' | 'DESC';
+  search?: string;
+  status?: string;
+  supplierId?: string;
+  [key: string]: any;
 }
 
 export interface SystemConfig {
   companyName?: string;
   taxPercentage?: number;
-  currency?: string;
+  taxes?: TaxSetting[];
+  currency?: any;
   timeZone?: string;
   dateFormat?: string;
+  logo?: string;
+  businessDetails?: {
+    name?: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+    logo?: string;
+  };
+  invoiceFormat?: {
+    prefix?: string;
+    numberLength?: number;
+    header?: string;
+    footer?: string;
+  };
+  expiryAlertDays?: number;
+  serviceCharge?: number;
+  serviceChargeType?: 'FIXED' | 'PERCENTAGE';
+  packagingCharge?: number;
+  packagingChargeType?: 'FIXED' | 'PERCENTAGE';
+  kitchenBillPrintingEnabled?: boolean;
+  enableDemoLogin?: boolean;
+  pointsPerDollar?: number;
+  pointsExpiryDays?: number;
+  dailyReceiptNumberLimit?: number;
+  pointsMultiplierByTier?: Record<string, number>;
+  [key: string]: any;
 }
 
 export interface TaxSetting {
-  taxPercentage: number;
+  taxPercentage?: number;
   taxName?: string;
+  name?: string;
+  rate?: number;
+  type?: 'INCLUSIVE' | 'EXCLUSIVE' | string;
+  isDefault?: boolean;
   description?: string;
+  [key: string]: any;
 }
 
 export interface CouponValidationResult {
@@ -862,6 +1049,7 @@ export interface CouponValidationResult {
   coupon?: Coupon;
   discount?: number;
   message?: string;
+  [key: string]: any;
 }
 
 export interface CreateBatchData {
@@ -871,6 +1059,7 @@ export interface CreateBatchData {
   expiryDate: string;
   costPrice?: number;
   sellingPrice?: number;
+  [key: string]: any;
 }
 
 export interface PnlSummary {
@@ -879,6 +1068,7 @@ export interface PnlSummary {
   profit: number;
   margin: number;
   period: string;
+  [key: string]: any;
 }
 
 // ==================== Permission Constants ====================

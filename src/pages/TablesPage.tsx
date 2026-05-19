@@ -15,6 +15,7 @@ const statusColors: Record<TableStatus, 'success' | 'warning' | 'danger' | 'info
   AVAILABLE: 'success',
   OCCUPIED: 'danger',
   RESERVED: 'warning',
+  MAINTENANCE: 'warning',
   CLEANING: 'info',
 };
 
@@ -229,8 +230,8 @@ export default function TablesPage() {
                       </div>
                     )}
                     <div className="mb-2 text-xs text-slate-500">Cap: {table.capacity}</div>
-                    <Badge variant={statusColors[table.status]}>
-                      {table.status}
+                    <Badge variant={statusColors[table.status || 'AVAILABLE']}>
+                      {table.status || 'AVAILABLE'}
                     </Badge>
                     <div className="mt-3 space-y-2">
                       {(table.status === 'AVAILABLE' || table.status === 'CLEANING') ? (
