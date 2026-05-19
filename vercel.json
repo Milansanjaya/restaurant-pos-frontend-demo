@@ -1,8 +1,5 @@
 {
-  "version": 2,
-  "projects": {
-    "default": {
-      "rootDirectory": "pos-frontend"
-    }
-  }
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "outputDirectory": "dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
