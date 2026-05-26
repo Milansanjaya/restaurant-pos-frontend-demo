@@ -137,6 +137,8 @@ export default function PosPage() {
   const [printingReceipt, setPrintingReceipt] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [printingKitchen, setPrintingKitchen] = useState(false);
+  const [showCollectCashModal, setShowCollectCashModal] = useState(false);
+  const [collectAmountGiven, setCollectAmountGiven] = useState<number>(0);
 
   const escapeHtml = (value: unknown) => {
     const str = String(value ?? '');
@@ -1590,7 +1592,7 @@ const handleAddToTable = async () => {
   }
 };
 
-const handleCreateSale = async () => {
+const handleCreateSale = async (paidAmount?: number) => {
   if (creatingSaleRef.current) return;
 
   if (items.length === 0) {
@@ -1618,6 +1620,11 @@ const handleCreateSale = async () => {
       paymentMethod: paymentMethod,
       orderType,
     };
+
+      if (typeof paidAmount === 'number') {
+        payload.payments = [{ amount: paidAmount, method: paymentMethod }];
+        payload.paidAmount = paidAmount;
+      }
 
     // Add customer if selected
     if (selectedCustomerId) {
@@ -2839,15 +2846,19 @@ const handleCreateSale = async () => {
                 </>
               ) : (
                 <button
-                  onClick={
-                    isPayingTable
-                      ? handleTablePayment
-                      : (orderType === 'DINE_IN' && selectedTable ? handleAddToTable : handleCreateSale)
-                  }
+                  onClick={() => {
+                    if (isPayingTable) return handleTablePayment();
+                    if (orderType === 'DINE_IN' && selectedTable) return handleAddToTable();
+                    // For immediate sales: collect cash first when paying by cash
+                    if (paymentMethod === 'CASH') {
+                      setCollectAmountGiven(finalTotal());
+                      return setShowCollectCashModal(true);
+                    }
+                    return handleCreateSale();
+                  }}
                   disabled={
                     !currentShift ||
                     items.length === 0 ||
-                    (!isPayingTable && orderType === 'DINE_IN' && !selectedTable) ||
                     isProcessing
                   }
                   className="touch-manipulation w-full rounded-2xl bg-slate-900 px-8 py-4 text-base font-bold text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.99] flex items-center justify-center gap-2"
@@ -4631,6 +4642,52 @@ const handleCreateSale = async () => {
                 className="touch-manipulation w-full rounded-2xl bg-slate-900 px-6 py-4 text-sm font-extrabold text-white hover:bg-slate-800 active:scale-[0.99] transition-all"
               >
                 ✓ Done — Next Order
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Collect Cash Modal (for immediate cash payments) */}
+      {showCollectCashModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Collect Cash</h3>
+              <button onClick={() => setShowCollectCashModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+
+            <div className="text-slate-600 text-sm">Total due</div>
+            <div className="text-2xl font-bold text-slate-900 mt-2">{formatMoney(finalTotal())}</div>
+
+            <label className="block text-sm text-slate-600 mt-4">Amount given</label>
+            <input
+              type="number"
+              value={collectAmountGiven}
+              onChange={(e) => setCollectAmountGiven(Number(e.target.value))}
+              className="mt-2 w-full rounded border px-3 py-2"
+            />
+
+            <div className="flex items-center justify-between text-sm text-slate-600 mt-4">
+              <div>Change</div>
+              <div className="font-medium">{formatMoney(Math.max(0, collectAmountGiven - finalTotal()))}</div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowCollectCashModal(false)}
+                className="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setShowCollectCashModal(false);
+                  await handleCreateSale(collectAmountGiven);
+                }}
+                className="flex-1 rounded-xl bg-green-600 px-4 py-3 font-medium text-white hover:bg-green-700"
+              >
+                Confirm
               </button>
             </div>
           </div>
